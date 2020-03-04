@@ -14,3 +14,8 @@
 - 10:00 pm to 11:00pm : 60 min
     - unit test infra
     - SourceErrorManager
+
+### March 3rd, 2020
+- 6:30 pm to 7:45 pm: 75 min
+    - Better LLVM integration
+    - clang-format
