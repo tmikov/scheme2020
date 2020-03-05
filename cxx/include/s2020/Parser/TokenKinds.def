@@ -1,0 +1,26 @@
+#ifndef TOK
+#define TOK(name, str)
+#endif
+
+// clang-format off
+
+TOK(none,       "<none>")
+TOK(identifier, "<identifier>")
+TOK(apostrophe, "'")
+TOK(backtick,   "`")
+TOK(comma,      ",")
+TOK(commaat,    ",@")
+TOK(period,     ".")
+TOK(l_brace,    "{")
+TOK(r_brace,    "}")
+TOK(l_paren,    "(")
+TOK(r_paren,    ")")
+TOK(l_square,   "[")
+TOK(r_square,   "]")
+
+TOK(exact_number, "<exact number>")
+TOK(inexact_number, "<inexact number>")
+
+TOK(eof,        "<eof>")
+
+#undef TOK

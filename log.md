@@ -19,3 +19,14 @@
 - 6:30 pm to 7:45 pm: 75 min
     - Better LLVM integration
     - clang-format
+
+### March 4th, 2020
+- 23:00 to 23:40 : 40 min
+
+### March 5th, 2020
+- 17:15 to 19:55
+
+### March 7th, 2020
+- 16:00 to 16:30
+- 19:30 to 21:30
+    - Partial lexer and lexer unittests
