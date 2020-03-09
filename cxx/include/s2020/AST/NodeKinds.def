@@ -1,0 +1,17 @@
+#ifndef S2020_AST_NODE
+#define S2020_AST_NODE(name)
+#endif
+
+// clang-format off
+
+S2020_AST_NODE(Boolean)
+S2020_AST_NODE(Number)
+S2020_AST_NODE(Character)
+S2020_AST_NODE(String)
+S2020_AST_NODE(Symbol)
+S2020_AST_NODE(Bytevector)
+S2020_AST_NODE(Pair)
+S2020_AST_NODE(Null)
+S2020_AST_NODE(Vector)
+
+#undef S2020_AST_NODE

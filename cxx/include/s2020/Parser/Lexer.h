@@ -1,15 +1,15 @@
 #ifndef SCHEME2020_PARSER_LEXER_H
 #define SCHEME2020_PARSER_LEXER_H
 
-#include "s2020/Support/SourceErrorManager.h"
-#include "s2020/Support/StringTable.h"
-
-#include "llvm/Support/Allocator.h"
+#include "s2020/AST/ASTContext.h"
 
 namespace s2020 {
 namespace parser {
 
-using Allocator = llvm::BumpPtrAllocator;
+using ast::ASTContext;
+using ast::ExactNumberT;
+using ast::InexactNumberT;
+using ast::Number;
 
 enum class TokenKind : uint8_t {
 #define TOK(name, str) name,
@@ -24,9 +24,6 @@ inline constexpr unsigned ord(TokenKind kind) {
 static constexpr unsigned NUM_TOKENS = ord(TokenKind::_last_token);
 const char *tokenKindStr(TokenKind kind);
 
-using ExactNumber = int64_t;
-using InexactNumber = double;
-
 /// A convenient way to structurally group the data associated with the / last
 /// token. More than one instance does not exist in one lexer.
 class Token {
@@ -36,8 +33,8 @@ class Token {
   Token(const Token &) = delete;
   void operator=(const Token &) = delete;
 
-  Token() = default;
-  ~Token() = default;
+  Token() {}
+  ~Token() {}
 
   TokenKind getKind() const {
     return kind_;
@@ -59,13 +56,9 @@ class Token {
         range_.End.getPointer() - range_.Start.getPointer());
   }
 
-  const ExactNumber &getExactNumber() const {
-    assert(getKind() == TokenKind::exact_number);
-    return exactNumber_;
-  }
-  const InexactNumber &getInexactNumber() const {
-    assert(getKind() == TokenKind::inexact_number);
-    return inexactNumber_;
+  const Number &getNumber() const {
+    assert(getKind() == TokenKind::number);
+    return number_;
   }
 
  private:
@@ -79,13 +72,9 @@ class Token {
     kind_ = TokenKind::identifier;
     ident_ = ident;
   }
-  void setExactNumber(ExactNumber exact) {
-    kind_ = TokenKind::exact_number;
-    exactNumber_ = exact;
-  }
-  void setInexactNumber(InexactNumber inexact) {
-    kind_ = TokenKind::inexact_number;
-    inexactNumber_ = inexact;
+  void setNumber(const Number &n) {
+    kind_ = TokenKind::number;
+    number_ = n;
   }
   void setKind(TokenKind kind) {
     kind_ = kind;
@@ -95,9 +84,8 @@ class Token {
   TokenKind kind_{TokenKind::none};
   SMRange range_{};
   union {
-    Identifier ident_{};
-    ExactNumber exactNumber_;
-    InexactNumber inexactNumber_;
+    Identifier ident_;
+    Number number_;
   };
 };
 
@@ -106,12 +94,12 @@ class Lexer {
   /// The last scanned token.
   Token token{};
 
-  explicit Lexer(
-      SourceErrorManager &sm,
-      Allocator &allocator,
-      StringTable &stringTable,
-      const llvm::MemoryBuffer &input);
+  explicit Lexer(ASTContext &context, const llvm::MemoryBuffer &input);
   ~Lexer();
+
+  ASTContext &getContext() const {
+    return context_;
+  }
 
   /// Force an EOF at the next token.
   void forceEOF() {
@@ -123,7 +111,7 @@ class Lexer {
   void advance();
 
   Identifier getIdentifier(StringRef name) {
-    return stringTable_.getIdentifier(name);
+    return context_.stringTable.getIdentifier(name);
   }
 
   /// Report an error for the range from startLoc to curCharPtr.
@@ -171,8 +159,7 @@ class Lexer {
       int sign);
 
  private:
-  SourceErrorManager &sm_;
-  StringTable &stringTable_;
+  ASTContext &context_;
 
   const char *bufferStart_{};
   const char *bufferEnd_{};

@@ -24,9 +24,13 @@
 - 23:00 to 23:40 : 40 min
 
 ### March 5th, 2020
-- 17:15 to 19:55
+- 17:15 to 19:55 : 160 min
 
 ### March 7th, 2020
-- 16:00 to 16:30
-- 19:30 to 21:30
+- 16:00 to 16:30 : 30 min
+- 19:30 to 21:30 : 120 min  (total 605 min)
     - Partial lexer and lexer unittests
+
+### March 8th, 2020
+- 17:00 to 19:30 : 150 min (total 755 min)
+    - Add AST abstractions

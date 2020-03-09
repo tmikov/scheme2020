@@ -18,8 +18,7 @@ TOK(r_paren,    ")")
 TOK(l_square,   "[")
 TOK(r_square,   "]")
 
-TOK(exact_number, "<exact number>")
-TOK(inexact_number, "<inexact number>")
+TOK(number, "<number>")
 
 TOK(eof,        "<eof>")
 

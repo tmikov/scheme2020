@@ -70,14 +70,11 @@ const char *tokenKindStr(TokenKind kind) {
   return tokenStr[ord(kind)];
 }
 
-Lexer::Lexer(
-    SourceErrorManager &sm,
-    Allocator &allocator,
-    StringTable &stringTable,
-    const llvm::MemoryBuffer &input)
-    : sm_(sm), stringTable_(stringTable) {
+Lexer::Lexer(ASTContext &context, const llvm::MemoryBuffer &input)
+    : context_(context) {
   assert(
-      sm_.findBufferForLoc(SMLoc::getFromPointer(input.getBufferStart())) &&
+      context_.sm.findBufferForLoc(
+          SMLoc::getFromPointer(input.getBufferStart())) &&
       "input buffer must be registered with SourceErrorManager");
 
   bufferStart_ = input.getBufferStart();
@@ -323,7 +320,7 @@ void Lexer::parseNumberDigits(
     } else {
       curCharPtr_ = ptr;
       token.setEnd(ptr);
-      token.setInexactNumber(0.0);
+      token.setNumber(context_.makeInexactNumber(0.0));
       error("invalid number: missing exponent");
       skipUntilDelimiter();
       return;
@@ -337,6 +334,7 @@ void Lexer::parseNumberDigits(
   }
 
   StringRef str{start, (size_t)(ptr - start)};
+  Number number;
 
   curCharPtr_ = ptr;
   token.setEnd(ptr);
@@ -346,19 +344,19 @@ void Lexer::parseNumberDigits(
 
   if (real && exact.getValue()) {
     error("real number cannot be represented as exact");
-    token.setExactNumber(0);
+    number = context_.makeExactNumber(0);
   } else if (!exact.getValue() && radix == 10) {
     double inexactRes;
     str.getAsDouble(inexactRes, true);
     if (sign < 0)
       inexactRes = -inexactRes;
-    token.setInexactNumber(inexactRes);
+    number = context_.makeInexactNumber(inexactRes);
   } else {
     llvm::APInt iresult{64, 0};
     str.getAsInteger(radix, iresult);
 
     if (exact.getValue()) {
-      ExactNumber exactRes;
+      ExactNumberT exactRes;
       if (iresult.getActiveBits() <= 64) {
         exactRes = iresult.getZExtValue();
       } else {
@@ -367,14 +365,16 @@ void Lexer::parseNumberDigits(
       }
       if (sign < 0)
         exactRes = -exactRes;
-      token.setExactNumber(exactRes);
+      number = context_.makeExactNumber(exactRes);
     } else {
       auto aDouble = iresult.roundToDouble();
       if (sign < 0)
         aDouble = -aDouble;
-      token.setInexactNumber(aDouble);
+      number = context_.makeInexactNumber(aDouble);
     }
   }
+
+  token.setNumber(number);
 
   skipUntilDelimiter();
 }
@@ -402,16 +402,16 @@ endLoop:
 }
 
 bool Lexer::error(llvm::SMLoc loc, const llvm::Twine &msg) {
-  sm_.error(loc, msg);
-  if (!sm_.isErrorLimitReached())
+  context_.sm.error(loc, msg);
+  if (!context_.sm.isErrorLimitReached())
     return true;
   forceEOF();
   return false;
 }
 
 bool Lexer::error(llvm::SMRange range, const llvm::Twine &msg) {
-  sm_.error(range, msg);
-  if (!sm_.isErrorLimitReached())
+  context_.sm.error(range, msg);
+  if (!context_.sm.isErrorLimitReached())
     return true;
   forceEOF();
   return false;
@@ -421,8 +421,8 @@ bool Lexer::error(
     llvm::SMLoc loc,
     llvm::SMRange range,
     const llvm::Twine &msg) {
-  sm_.error(loc, range, msg);
-  if (!sm_.isErrorLimitReached())
+  context_.sm.error(loc, range, msg);
+  if (!context_.sm.isErrorLimitReached())
     return true;
   forceEOF();
   return false;
