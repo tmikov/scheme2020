@@ -22,12 +22,14 @@ class LexerTest : public ::testing::Test {
 };
 
 TEST_F(LexerTest, SmokeTest) {
-  Lexer lex{context_, makeBuf(" (+\t a 10)\n ")};
+  Lexer lex{context_, makeBuf(" (+\t #;a 10)\n ")};
 
   lex.advance();
   ASSERT_EQ(TokenKind::l_paren, lex.token.getKind());
   lex.advance();
   ASSERT_EQ(TokenKind::identifier, lex.token.getKind());
+  lex.advance();
+  ASSERT_EQ(TokenKind::datum_comment, lex.token.getKind());
   lex.advance();
   ASSERT_EQ(TokenKind::identifier, lex.token.getKind());
   lex.advance();

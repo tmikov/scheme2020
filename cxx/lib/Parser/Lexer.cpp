@@ -17,8 +17,10 @@ struct CC {
     PeculiarIdentClass = 3,
     /// 0-9
     DigitClass = 4,
+    /// #
+    HashClass = 5,
     /// UTF8
-    UTF8Class = 5,
+    UTF8Class = 6,
 
     // 3
     /// Subsequent identifier.
@@ -188,6 +190,22 @@ void Lexer::advance() {
         parseNumberDigits(curCharPtr_, llvm::None, 10, 1);
         return;
 
+      case CC::HashClass:
+        token.setStart(curCharPtr_);
+        ++curCharPtr_;
+        switch (*curCharPtr_) {
+          case ';':
+            ++curCharPtr_;
+            token.setEnd(curCharPtr_);
+            token.setKind(TokenKind::datum_comment);
+            return;
+        }
+        token.setEnd(curCharPtr_);
+        error("invalid token");
+        skipUntilDelimiter(true);
+        chFlags = getCharFlags(curCharPtr_);
+        continue;
+
       case CC::UTF8Class:
         error(SMLoc::getFromPointer(curCharPtr_), "unsupported character");
         // Skip all UTF8 characters.
@@ -249,20 +267,21 @@ void Lexer::advance() {
   }
 }
 
-inline void Lexer::skipUntilDelimiter() {
+inline void Lexer::skipUntilDelimiter(bool errorReported) {
   // If this character is a delimiter or we are at EOF, all is good.
   if (LLVM_LIKELY(CC::testDelimiter(getCharFlags(curCharPtr_))))
     return;
-  _skipUntilDelimiterSlowPath();
+  _skipUntilDelimiterSlowPath(errorReported);
 }
 
-void Lexer::_skipUntilDelimiterSlowPath() {
+void Lexer::_skipUntilDelimiterSlowPath(bool errorReported) {
   // EOF?
   if (!*curCharPtr_ && curCharPtr_ == bufferEnd_)
     return;
 
   // Otherwise it is an error and we must skip until a delimiter.
-  error(SMLoc::getFromPointer(curCharPtr_), "delimiter expected");
+  if (!errorReported)
+    error(SMLoc::getFromPointer(curCharPtr_), "delimiter expected");
   ++curCharPtr_;
   while (!CC::testDelimiter(getCharFlags(curCharPtr_))) {
     if (!*curCharPtr_ && curCharPtr_ == bufferEnd_)

@@ -33,7 +33,7 @@
   /*  32, ' '  */ CC::Delimiter | CC::WhitespaceClass,
   /*  33, '!'  */ CC::DotSubsequent | CC::InitialClass | CC::SignSubsequent | CC::Subsequent,
   /*  34, '"'  */ CC::Delimiter,
-  /*  35, '#'  */ 0,
+  /*  35, '#'  */ CC::HashClass,
   /*  36, '$'  */ CC::DotSubsequent | CC::InitialClass | CC::SignSubsequent | CC::Subsequent,
   /*  37, '%'  */ CC::DotSubsequent | CC::InitialClass | CC::SignSubsequent | CC::Subsequent,
   /*  38, '&'  */ CC::DotSubsequent | CC::InitialClass | CC::SignSubsequent | CC::Subsequent,

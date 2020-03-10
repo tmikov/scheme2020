@@ -18,6 +18,8 @@ TOK(r_paren,    ")")
 TOK(l_square,   "[")
 TOK(r_square,   "]")
 
+TOK(datum_comment, "#;")
+
 TOK(number, "<number>")
 
 TOK(eof,        "<eof>")

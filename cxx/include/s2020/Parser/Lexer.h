@@ -151,10 +151,14 @@ class Lexer {
   /// The current character is expected to be a delimiter or an EOF. If so,
   /// do nothing and return. Otherwise, report an error and skip until a
   /// delimiter or EOF.
-  inline void skipUntilDelimiter();
+  /// \param errorReported whether an error has already been reported and
+  ///     further errors should be supressed.
+  inline void skipUntilDelimiter(bool errorReported = false);
 
   /// The slow path of \c skipUntilDelimiter()
-  void _skipUntilDelimiterSlowPath();
+  /// \param errorReported whether an error has already been reported and
+  ///     further errors should be supressed.
+  void _skipUntilDelimiterSlowPath(bool errorReported);
 
   void skipLineComment(const char *start);
   void parseNumberDigits(

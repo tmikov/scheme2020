@@ -66,6 +66,7 @@ SIGN_SUBSEQUENT = ("CC::SignSubsequent", DOT_SUBSEQUENT)
 INITIAL = ("CC::InitialClass", SIGN_SUBSEQUENT)
 
 DIGIT = "CC::DigitClass"
+HASH = "CC::HashClass"
 
 addRange(INITIAL, 'a', 'z')
 addRange(INITIAL, 'A', 'Z')
@@ -88,6 +89,7 @@ add(DOT_SUBSEQUENT, '.')
 addRange(DIGIT, '0', '9')
 add(DELIMITER, '|', '(', ')', '[', ']', '{', '}', '"', ';')
 
+add(HASH, '#')
 addRange(UTF8, 128, 255)
 
 genTable()
