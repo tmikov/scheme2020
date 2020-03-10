@@ -61,6 +61,11 @@ class Token {
     return number_;
   }
 
+  Identifier getIdentifier() const {
+    assert(getKind() == TokenKind::identifier);
+    return ident_;
+  }
+
  private:
   void setStart(const char *start) {
     range_.Start = SMLoc::getFromPointer(start);

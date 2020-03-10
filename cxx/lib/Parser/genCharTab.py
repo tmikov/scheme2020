@@ -2,11 +2,13 @@
 
 from __future__ import print_function
 
-tab = [[] for i in xrange(0,256)]
+tab = [[] for i in range(0, 256)]
+
 
 def addSingleTag(tag, i):
     if not tab[i].count(tag):
         tab[i].append(tag)
+
 
 def addTag(tag, i):
     if type(tag) is tuple:
@@ -15,13 +17,15 @@ def addTag(tag, i):
     else:
         addSingleTag(tag, i)
 
+
 def addRange(tag, a, b):
     if type(a) is str:
         a = ord(a)
     if type(b) is str:
         b = ord(b)
-    for i in xrange(a, b + 1):
+    for i in range(a, b + 1):
         addTag(tag, i)
+
 
 def add(tag, *elems):
     for i in elems:
@@ -31,7 +35,7 @@ def add(tag, *elems):
 
 
 def genTable():
-    for i in xrange(0,256):
+    for i in range(0, 256):
         print("  /* %3d, " % i, end="")
         if i < 32 or i >= 127:
             print("0x%02x" % i, end="")
@@ -65,11 +69,13 @@ DIGIT = "CC::DigitClass"
 
 addRange(INITIAL, 'a', 'z')
 addRange(INITIAL, 'A', 'Z')
-add(INITIAL, '!', '$', '%', '&', '*', '/', ':', '<', '=', '>', '?', '^', '_', '~', '@')
+add(INITIAL, '!', '$', '%', '&', '*', '/', ':', '<', '=', '>', '?', '^', '_',
+    '~', '@')
 
 addRange(SUBSEQUENT, 'a', 'z')
 addRange(SUBSEQUENT, 'A', 'Z')
-add(SUBSEQUENT, '!', '$', '%', '&', '*', '/', ':', '<', '=', '>', '?', '^', '_', '~')
+add(SUBSEQUENT, '!', '$', '%', '&', '*', '/', ':', '<', '=', '>', '?', '^', '_',
+    '~')
 addRange(SUBSEQUENT, '0', '9')
 add(SUBSEQUENT, '+', '-', '.', '@')
 

@@ -219,7 +219,7 @@ void Lexer::advance() {
             ++curCharPtr_;
             if (*curCharPtr_ == '@') {
               ++curCharPtr_;
-              token.setKind(TokenKind::commaat);
+              token.setKind(TokenKind::comma_at);
             } else {
               token.setKind(TokenKind::comma);
             }
@@ -229,6 +229,8 @@ void Lexer::advance() {
           // Possibly EOF.
           case '\0':
             if (curCharPtr_ == bufferEnd_) {
+              token.setStart(curCharPtr_);
+              token.setEnd(curCharPtr_);
               token.setKind(TokenKind::eof);
               return;
             }
