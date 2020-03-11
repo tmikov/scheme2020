@@ -52,4 +52,20 @@ Given the deliberately short time frame, the initial version of Scheme2020 has n
 
 With this strategy, I believe Scheme2020 can eventually feel and perform very natural in an ecosystem of C/C++/Rust, etc, while preserving all of its expressivity and power.
 
- 
+### Numeric Tower
+
+Traditionally Scheme implementations support the following number types:
+- exact bigint
+- exact rational (a ratio of bigints)
+- inexact real (usually IEEE-754) 
+- complex with any of the above components
+
+From an implementation viewpoint this is not terribly interesting, as it is all done in library calls. Good implementations usually support some kind of efficient "small int" which automatically overflows into a heap-allocated *bigint*. The techniques for that are well known.
+
+It is important to note that the R7RS-Small does not require implementations to support all of the above number types. The spec is pretty liberal in this respect and pretty much the only requirement is that an implementation must support separate *exact* and *inexact* number types. The behavior on overlow is not specified. This allows compliant Scheme implementations to exist with de-facto C number semantics.
+
+Scheme2020 will initially support two number types: 
+- IEEE 64-bit double
+- 64-bit twos complement signed integer, with Java-like semantics (overflow wraps around).
+
+As far as I can tell, this satisfies the requirements of the spec. More number types can be added incrementally if needed (rationals, complex). I do not plan on adding bigint support because philosophically it takes the implementation in a different direction (not a bad one, just one that I am not personally interested in). 
