@@ -5,6 +5,10 @@
 #include <cstdint>
 #include <cstring>
 
+namespace llvm {
+class raw_ostream;
+} // namespace llvm
+
 namespace s2020 {
 namespace ast {
 
@@ -51,6 +55,10 @@ class Number {
         memcmp(&exact_, &other.exact_, sizeof(exact_)) == 0;
   }
 
+  bool operator==(const Number &other) const {
+    return equals(other);
+  }
+
   bool exactEquals(ExactNumberT o) const {
     return kind_ == NumberKind::exact && exact_ == o;
   }
@@ -74,6 +82,8 @@ class Number {
     InexactNumberT inexact_;
   };
 };
+
+llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const Number &number);
 
 } // namespace ast
 } // namespace s2020

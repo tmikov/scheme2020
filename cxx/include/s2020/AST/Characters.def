@@ -1,0 +1,17 @@
+#ifndef S2020_CHARACTER
+#define S2020_CHARACTER(name, code)
+#endif
+
+// Named Scheme characters.
+
+S2020_CHARACTER(alarm, 0x07)
+S2020_CHARACTER(backspace, 0x08)
+S2020_CHARACTER(delete, 0x7f)
+S2020_CHARACTER(escape, 0x1b)
+S2020_CHARACTER(newline, 0x0a)
+S2020_CHARACTER(null, 0x00)
+S2020_CHARACTER(return, 0x0d)
+S2020_CHARACTER(space, 0x20)
+S2020_CHARACTER(tab, 0x09)
+
+#undef S2020_CHARACTER

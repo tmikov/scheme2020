@@ -6,6 +6,10 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/SMLoc.h"
 
+namespace llvm {
+class raw_ostream;
+} // namespace llvm
+
 namespace s2020 {
 namespace ast {
 
@@ -121,6 +125,10 @@ using SymbolNode = SimpleNode<NodeKind::Symbol, Identifier>;
 using NumberNode = SimpleNode<NodeKind::Number, Number>;
 using NullNode = BaseNode<NodeKind::Null>;
 
+// FIXME: implement these.
+using BytevectorNode = BaseNode<NodeKind::Bytevector>;
+using VectorNode = BaseNode<NodeKind::Vector>;
+
 class PairNode : public BaseNode<NodeKind::Pair> {
  public:
   explicit PairNode(Node *car, Node *cdr) : car_(car), cdr_(cdr) {}
@@ -142,6 +150,24 @@ class PairNode : public BaseNode<NodeKind::Pair> {
   Node *car_;
   Node *cdr_;
 };
+
+/// Allocate a new PairNode.
+PairNode *cons(ASTContext &ctx, Node *a, Node *b);
+
+// Allocate a new proper list.
+inline Node *list(ASTContext &ctx) {
+  return new (ctx) NullNode();
+}
+template <typename... Args>
+inline Node *list(ASTContext &ctx, Node *first, Args... args) {
+  return cons(ctx, first, list(ctx, args...));
+}
+
+/// Compare the two ASTs (ignoring source coordinates).
+bool deepEqual(const Node *a, const Node *b);
+
+/// Print the AST recursively.
+void dump(llvm::raw_ostream &OS, const Node *node);
 
 } // namespace ast
 } // namespace s2020
