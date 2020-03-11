@@ -34,3 +34,12 @@
 ### March 8th, 2020
 - 17:00 to 19:30 : 150 min (total 755 min)
     - Add AST abstractions
+
+### March 9th, 2020
+- 19:00 to 21:45 : 165 min (total 920 min)
+    - Datum parser
+
+### March 10th, 2020
+- 19:30 to 21:00 : 90 min (total 1010 min)
+    - AST improvements
+    - Datum parser and unittests
