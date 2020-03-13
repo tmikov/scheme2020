@@ -43,3 +43,7 @@
 - 19:30 to 21:00 : 90 min (total 1010 min)
     - AST improvements
     - Datum parser and unittests
+
+### March 12th, 2020
+- 19:30 - 20:30 : 60 min (total 1070 min)
+    - AST & DatumpParser improvements

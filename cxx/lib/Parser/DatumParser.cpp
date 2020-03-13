@@ -18,7 +18,7 @@ class DatumParser {
     lex_.advance();
   }
 
-  llvm::Optional<std::vector<ast::Node *>> parse();
+  llvm::Optional<ast::Node *> parse();
 
  private:
   ast::Node *parseDatum();
@@ -74,22 +74,22 @@ class DatumParser::NestingRAII {
   } else {                                     \
   }
 
-llvm::Optional<std::vector<ast::Node *>> DatumParser::parse() {
+llvm::Optional<ast::Node *> DatumParser::parse() {
   // Remember how many errors we started with.
   if (context_.sm.isErrorLimitReached())
     return llvm::None;
 
   auto numErrors = context_.sm.getErrorCount();
 
-  std::vector<ast::Node *> res{};
+  ast::ListBuilder list{};
   while (auto *datum = parseDatum())
-    res.push_back(datum);
+    list.append(context_, datum);
 
   // If errors occurred
   if (numErrors != context_.sm.getErrorCount())
     return llvm::None;
 
-  return std::move(res);
+  return list.finishList(context_);
 }
 
 ast::Node *DatumParser::parseDatum() {
@@ -236,7 +236,7 @@ reportUnterminated:
 
 } // anonymous namespace
 
-llvm::Optional<std::vector<ast::Node *>> parseDatums(
+llvm::Optional<ast::Node *> parseDatums(
     ast::ASTContext &context,
     const llvm::MemoryBuffer &input) {
   DatumParser parser{context, input};

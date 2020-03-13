@@ -42,7 +42,7 @@ TEST_F(DatumParserTest, PrintTest) {
 
   std::string str;
   llvm::raw_string_ostream OS{str};
-  for (const auto *node : res.getValue())
+  for (const auto *node : make_range(res.getValue()))
     dump(OS, node);
   OS.flush();
   ASSERT_EQ(
@@ -80,7 +80,7 @@ TEST_F(DatumParserTest, SmokeTest) {
               "  (10 . (20 . (30 . ())))"
               "  (if [> a 10] (display 1) (display a)))"));
   ASSERT_TRUE(parsed.hasValue());
-  ASSERT_EQ(1, parsed.getValue().size());
+  ASSERT_EQ(1, listSize(parsed.getValue()));
 
   auto *l = list(
       context_,
@@ -100,7 +100,7 @@ TEST_F(DatumParserTest, SmokeTest) {
           list(context_, Sym("display"), Num(1)),
           list(context_, Sym("display"), Sym("a"))));
 
-  ASSERT_TRUE(deepEqual(parsed.getValue().at(0), l));
+  ASSERT_TRUE(deepEqual(listHead(parsed.getValue()), l));
 }
 
 } // anonymous namespace
