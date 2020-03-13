@@ -4,6 +4,7 @@
 #include "s2020/AST/ASTContext.h"
 
 #include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/iterator_range.h"
 #include "llvm/Support/SMLoc.h"
 
 namespace llvm {
@@ -162,6 +163,141 @@ template <typename... Args>
 inline Node *list(ASTContext &ctx, Node *first, Args... args) {
   return cons(ctx, first, list(ctx, args...));
 }
+
+/// A convenience class for building a list by appending to the end.
+class ListBuilder {
+ public:
+  ListBuilder(const ListBuilder &) = delete;
+  void operator=(const ListBuilder &) = delete;
+
+  explicit ListBuilder() = default;
+
+  void append(ASTContext &ctx, Node *n) {
+    assert(n && "Node cannot be nullptr");
+    appendNewTail(new (ctx) PairNode(n, nullptr));
+  }
+
+  /// Finish the construction of the list and return it.
+  Node *finishList(ASTContext &ctx);
+
+ private:
+  void appendNewTail(Node *newTail) {
+    if (tail_)
+      llvm::cast<PairNode>(tail_)->setCdr(newTail);
+    else
+      head_ = newTail;
+    tail_ = newTail;
+  }
+
+ private:
+  Node *head_{};
+  Node *tail_{};
+};
+
+/// \return true if this is a PairNode or NullNode.
+inline bool isList(Node *list) {
+  return llvm::isa<PairNode>(list) || llvm::isa<NullNode>(list);
+}
+
+inline bool isListEmpty(Node *list) {
+  assert(isList(list) && "argument must be a list");
+  return llvm::isa<NullNode>(list);
+}
+
+/// List iterator. Note that the last element in improper lists will be ignored.
+class ListIterator {
+ public:
+  explicit ListIterator(Node *node) : pair_(llvm::dyn_cast<PairNode>(node)) {
+    assert(isList(node) && "node must be a list");
+  }
+  explicit ListIterator() : pair_(nullptr) {}
+
+  bool operator==(const ListIterator &it) const {
+    return pair_ == it.pair_;
+  }
+  bool operator!=(const ListIterator &it) const {
+    return pair_ != it.pair_;
+  }
+
+  ListIterator &operator++() {
+    assert(pair_ && "attempting to increment ListIterator past end");
+    pair_ = llvm::dyn_cast<PairNode>(pair_->getCdr());
+    return *this;
+  }
+
+  Node *operator*() const {
+    assert(pair_ && "attempting to dereference end ListIterator");
+    return pair_->getCar();
+  }
+  Node *operator->() const {
+    return operator*();
+  }
+
+ private:
+  PairNode *pair_;
+};
+
+/// Similar to \c ListIterator but iterate over the pairs.
+class ListPairIterator {
+ public:
+  explicit ListPairIterator(Node *node)
+      : pair_(llvm::dyn_cast<PairNode>(node)) {
+    assert(isList(node) && "node must be a list");
+  }
+  explicit ListPairIterator() : pair_(nullptr) {}
+
+  bool operator==(const ListPairIterator &it) const {
+    return pair_ == it.pair_;
+  }
+  bool operator!=(const ListPairIterator &it) const {
+    return pair_ != it.pair_;
+  }
+
+  ListPairIterator &operator++() {
+    assert(pair_ && "attempting to increment ListIterator past end");
+    pair_ = llvm::dyn_cast<PairNode>(pair_->getCdr());
+    return *this;
+  }
+
+  PairNode *operator*() const {
+    assert(pair_ && "attempting to dereference end ListIterator");
+    return pair_;
+  }
+  PairNode *operator->() const {
+    return operator*();
+  }
+
+ private:
+  PairNode *pair_;
+};
+
+/// Convenience function for iterating lists.
+inline llvm::iterator_range<ListIterator> make_range(Node *list) {
+  return llvm::make_range(ListIterator(list), ListIterator());
+}
+
+/// Convenience function for iterating lists.
+inline llvm::iterator_range<ListPairIterator> makeListPairRange(Node *list) {
+  return llvm::make_range(ListPairIterator(list), ListPairIterator());
+}
+
+/// \return the number of elements in a list. Improper elements are ignored.
+size_t listSize(Node *list);
+
+/// \return the head of a non-empty list.
+inline Node *listHead(Node *list) {
+  assert(!isListEmpty(list) && "list must not be empty");
+  return llvm::cast<PairNode>(list)->getCar();
+}
+
+/// \return the tail of a non-empty list.
+inline Node *listTail(Node *list) {
+  assert(!isListEmpty(list) && "list must not be empty");
+  return llvm::cast<PairNode>(list)->getCdr();
+}
+
+/// \return true if \p list, which must be a list, is a proper list.
+bool isListProper(Node *list);
 
 /// Compare the two ASTs (ignoring source coordinates).
 bool deepEqual(const Node *a, const Node *b);

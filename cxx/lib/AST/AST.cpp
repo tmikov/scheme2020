@@ -24,6 +24,47 @@ PairNode *cons(ASTContext &ctx, Node *a, Node *b) {
   return new (ctx) PairNode(a, b);
 }
 
+Node *ListBuilder::finishList(ASTContext &ctx) {
+  llvm::SMLoc endLoc{};
+  if (tail_)
+    endLoc = cast<PairNode>(tail_)->getEndLoc();
+
+  appendNewTail(new (ctx) NullNode());
+
+  assert(head_ && "head_ must have been initialized");
+
+  // Initialize the source locations for consistency.
+  for (auto *cur : makeListPairRange(head_)) {
+    cur->setStartLoc(cur->getCar()->getStartLoc());
+    cur->setEndLoc(endLoc);
+  }
+
+  auto *res = head_;
+  head_ = tail_ = nullptr;
+  return res;
+}
+
+size_t listSize(Node *list) {
+  assert(isList(list) && "argument must be a list");
+  size_t size = 0;
+  for (auto *cur : makeListPairRange(list)) {
+    (void)cur;
+    ++size;
+  }
+  return size;
+}
+
+bool isProperList(Node *list) {
+  assert(isList(list) && "argument must be a list");
+  // An empty list is a proper list.
+  if (!isa<PairNode>(list))
+    return true;
+  auto *cur = cast<PairNode>(list);
+  while (isa<PairNode>(cur->getCdr()))
+    cur = cast<PairNode>(cur->getCdr());
+  return isa<NullNode>(cur->getCdr());
+}
+
 #define DECLARE_SIMPLE_AST_EQUAL(name)                                       \
   static inline bool equal##name(const name##Node *a, const name##Node *b) { \
     return a->getValue() == b->getValue();                                   \
